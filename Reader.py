@@ -154,7 +154,8 @@ print "_____________RESULTATS_______________"
 print "Total positives: ", totalPositives
 print "Total negatives: ", totalNegatives
 print "Total entries", totalEntries
-print "Array Resultat", result
+print "Array resultBayes", resultBayes
+print "Array resultLaplace", resultLaplace
 print "efficiencyBayes",efficiencyBayes
 print "efficiencyLaplace", efficiencyLaplace
 #print "Dictionary Positives",sortDictPositives
