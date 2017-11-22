@@ -49,12 +49,17 @@ sortDictPositives = OrderedDict(sortedListPositives)
 sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
 sortDictNegatives = OrderedDict(sortedListNegatives)
 
+#take some elements
+numOfElements=100
+nItems = OrderedDict(sortDictPositives.items()[:100])
 
 #Some prints
 print "Total positives: ", totalPositives
 print "Total negatives: ", TotalNegatives
 print "Total entries", totalEntries
-print "Dictionary Positives",sortDictPositives['the']
+print "Dictionary Positives",sortDictPositives
 print 
+print '----------------------------------------'
 print 
-print "Dictionary Negatives ",sortDictNegatives['the']
+print "Dictionary Negatives ",sortDictNegatives
+print nItems['the']
