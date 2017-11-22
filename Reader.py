@@ -1,12 +1,11 @@
 import csv
 import numpy as np
 import operator
+from collections import OrderedDict
 destFile='shortDatabase.csv'
 dictionaryPositives={}
 dictionaryNegatives={}
 
-dictionaryPropNegatives={}
-dictionaryPropPositives={}
 
 #Used for counter
 totalPositives=0
@@ -45,19 +44,17 @@ for eachEntry in data_array:
 	totalEntries+=1
 
 #Sorts for the dicts
-sortedDictionaryPositives = sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
-sortedDictionaryPositives=dict(sortedDictionaryPositives)
-
-sortedDictionaryNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
-sortedDictionaryNegatives=dict(sortedDictionaryNegatives)
-
+sortedListPositives =sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
+sortDictPositives = OrderedDict(sortedListPositives)
+sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
+sortDictNegatives = OrderedDict(sortedListNegatives)
 
 
 #Some prints
 print "Total positives: ", totalPositives
 print "Total negatives: ", TotalNegatives
 print "Total entries", totalEntries
-print "Dictionary Positives",sortedDictionaryPositives
+print "Dictionary Positives",sortDictPositives['the']
 print 
 print 
-print "Dictionary Negatives ",sortedDictionaryNegatives
+print "Dictionary Negatives ",sortDictNegatives['the']
