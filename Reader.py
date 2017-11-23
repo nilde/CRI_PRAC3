@@ -14,6 +14,45 @@ def split_data(data, train_ratio=0.8):
     validation = data[indices_val, :]
     return train, validation
 
+def precision(tPositive, fPositive):
+    return tPositive/(tPositive+fPositive)
+
+def accuracy(tPositive, tNegative, fPositive, fNegative):
+    return (tPositive+tNegative)/(tPositive+tNegative+fPositive+fNegative)
+
+def recall(tPositive, fNegative):
+    if (tPositive+fNegative) == 0:
+        return 0
+    else:
+        return tPositive/(tPositive+fNegative)
+
+def specifity(tNegative, fPositive):
+    if (tNegative+fPositive) == 0:
+        return 0
+    else:
+        return tNegative/(tNegative+fPositive)
+
+def fScore(prec, rec):
+    if (prec+rec) == 0:
+        return 0
+    else:
+        return (2*prec*rec) /(prec+rec)
+
+def printMedidas(tp, tn, fp, fn):
+    tp = float(tp)
+    tn = float(tn)
+    fp = float(fp)
+    fn = float(fn)
+    
+    prec = precision(tp,fp)
+    acc = accuracy(tp,tn,fp,fn)
+    rec = recall(tp,fn)
+    spcy = specifity(tn,fp)
+    fS = fScore(prec, rec)
+    print  "tp: "+str(tp)+" tn: "+str(tn)+" fp: "+str(fp)+" fn: "+str(fn)
+    print "Precision: "+str(prec)+"\nAccuracy: "+str(acc)+"\nRecall: "+str(rec)+"\nSpecificity: "+str(spcy)+"\nfScore: "+str(fS)
+    return prec, acc, rec, spcy, fS
+
 def laplaceSmoothingPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg, alpha=0.2):
     result = np.array([])
     for eachData in data_tst[:,1]:
@@ -39,8 +78,6 @@ def laplaceSmoothingPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNe
     return result
 
 def bayesianPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg,totalPosExamples,totalNegExamples):
-    numPosExamples=0
-    numNegExamples=0
     result = np.array([])
     positives=0
     negatives=0
@@ -87,10 +124,11 @@ def evaluation(predict, validatation):
                 efficiency['FP']+=1
             else:
                 efficiency['FN']+=1
-    return efficiency
+    return dict(efficiency)
 
 
 destFile='FinalStemmedSentimentAnalysisDataset.csv'
+#destFile='shortDatabase.csv'
 dictionaryPositives={}
 dictionaryNegatives={}
 
@@ -141,7 +179,6 @@ for eachEntry in data_tr:
             totalPositives+=1
         totalNegativeEntries+=1
     totalEntries+=1
-
 t1 = time.time()
 print "Analisi train en",t1-t0
 print "Contar positius i negatius finalitzat (45%)"
@@ -159,7 +196,7 @@ numOfElements=100
 nItems = OrderedDict(sortDictPositives.items()[:numOfElements])
 t3=time.time()
 print "Comencem a extreure resultats (75%)"
-alpha = 0.2
+alpha = 0.5
 
 resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
 #resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
@@ -171,6 +208,8 @@ print "resultats Finalitzats anem a evaluacio (90%) amb temps",t4-t3
 efficiencyBayes = evaluation(resultBayes,data_tst)
 #efficiencyLaplace = evaluation(resultLaplace,data_tst)
 t5 = time.time()
+
+
 print "fi evaluacio (100%) va passar",t5-t0
 print
 print "_____________RESULTATS_______________"
@@ -183,9 +222,10 @@ print "Total negatives examples: ", totalNegativeEntries
 print "Total entries", totalEntries
 print "Array resultBayes", resultBayes
 #print "Array resultLaplace", resultLaplace
-print "efficiencyBayes",efficiencyBayes
-#print "efficiencyLaplace", efficiencyLaplace
-#print "Dictionary Positives",sortDictPositives
+print "Resultats Bayes"
+printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
+#print "Resultats Laplace"
+#printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
 print 
 print '----------------------------------------'
 print 
