@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import operator
 from collections import OrderedDict
+import time
 
 def split_data(data, train_ratio=0.8):
     indices = np.arange(data.shape[0])
@@ -37,28 +38,40 @@ def laplaceSmoothingPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNe
         result = np.insert(result,len(result),res)
     return result
 
-def bayesianPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg):
+def bayesianPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg,totalPosExamples,totalNegExamples):
+    numPosExamples=0
+    numNegExamples=0
     result = np.array([])
+    positives=0
+    negatives=0
     for eachData in data_tst[:,1]:
         separatedWords = eachData.split(' ')
         pos,neg=0,0
         for word in separatedWords:
-            if dicNeg.has_key(word) or dicPos.has_key(word):
-                try:
-                    pos += np.log(dicPos[word]/totalPos)
-                except:
-                    pos += 0
-                try:
-                    neg += np.log(dicNeg[word]/totalNeg)
-                except:
-                    neg += 0
-        pos += totalPos/totalEnt
-        neg += totalNeg/totalEnt
-       
+            if dicPos.has_key(word):
+                pos += np.log(dicPos[word]/totalPos)
+            else:
+                pos += 0
+            if dicNeg.has_key(word):
+                neg += np.log(dicNeg[word]/totalNeg)
+            else:
+                neg += 0
+
+        pos += totalPosExamples/totalEnt
+        neg += totalNegExamples/totalEnt
+
         res = 1
         if pos<neg:
             res = 0
+
+        if res==1:
+            positives+=1
+        else:
+            negatives+=1
+
         result = np.insert(result,len(result),res)
+    print 'Number of positives classifications: ',positives
+    print 'Number of negatives classifications: ',negatives
     return result
 
 def evaluation(predict, validatation):
@@ -82,9 +95,13 @@ dictionaryPositives={}
 dictionaryNegatives={}
 
 
-#Used for counter
+#Used for word count
 totalPositives=0
 totalNegatives=0
+
+#Used for total count
+totalPositiveEntries=0
+totalNegativeEntries=0
 totalEntries=0
 
 #Metrics for compute algorithm efficiency
@@ -95,72 +112,81 @@ with open(destFile,'r') as destF:
                            quotechar = '"')
 
     data = [data for data in dataForIter]
-data_array = np.asarray(data) 
+data_array = np.asarray(data)
 
-print "Lectura Finalitzada"
+print "Lectura Finalitzada (15%)"
 
-ratio = 0.1
+ratio = 0.8
 data_tr,data_tst = split_data(data_array,ratio)
-print "particio finalitzada amb ratio de:",ratio
+print "Particio finalitzada amb ratio de:",ratio,' (30%)'
+t0 = time.time()
 #Some treaatment to create train and test sets
 
 #Generation of the dicts
 for eachEntry in data_tr:
-	if eachEntry[-1]=='0':
-		for eachWord in eachEntry[1].split(' '):
-			if (dictionaryNegatives.has_key(eachWord)):
-				dictionaryNegatives[eachWord] += 1.0
-        	else:
-				dictionaryNegatives[eachWord] = 1.0
-		totalNegatives+=1
-	else:
-		for eachWord in eachEntry[1].split(' '):
-			if (dictionaryPositives.has_key(eachWord)):
-				dictionaryPositives[eachWord] += 1.0
-        	else:
-				dictionaryPositives[eachWord] = 1.0
-		totalPositives+=1
-	totalEntries+=1
+    if eachEntry[-1]=='0':
+        for eachWord in eachEntry[1].split(' '):
+            if (dictionaryNegatives.has_key(eachWord)):
+                dictionaryNegatives[eachWord] += 1.0
+            else:
+                dictionaryNegatives[eachWord] = 1.0
+            totalNegatives+=1
+        totalPositiveEntries+=1
+    else:
+        for eachWord in eachEntry[1].split(' '):
+            if (dictionaryPositives.has_key(eachWord)):
+                dictionaryPositives[eachWord] += 1.0
+            else:
+                dictionaryPositives[eachWord] = 1.0
+            totalPositives+=1
+        totalNegativeEntries+=1
+    totalEntries+=1
 
-print "Contar positius i negatius finalitzat"
+t1 = time.time()
+print "Analisi train en",t1-t0
+print "Contar positius i negatius finalitzat (45%)"
 #Sorts for the dicts
 sortedListPositives =sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
 sortDictPositives = OrderedDict(sortedListPositives)
 sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
 sortDictNegatives = OrderedDict(sortedListNegatives)
 
-print "Ordenacio finalitzada"
+t2 = time.time()
+print "Ordenacio finalitzada (60%) temps",t2-t1
 
 #take some elements
 numOfElements=100
 nItems = OrderedDict(sortDictPositives.items()[:numOfElements])
-
-print "Comencem a extreure resultats"
+t3=time.time()
+print "Comencem a extreure resultats (75%)"
 alpha = 0.2
 
-resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives)
-resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
+resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
+#resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
 
-print "resultats Finalitzats anem a evaluacio"
+t4 = time.time()
+print "resultats Finalitzats anem a evaluacio (90%) amb temps",t4-t3
 
 #get TP,TN,FP,FN
 efficiencyBayes = evaluation(resultBayes,data_tst)
-efficiencyLaplace = evaluation(resultLaplace,data_tst)
-
-print "fi evaluacio"
+#efficiencyLaplace = evaluation(resultLaplace,data_tst)
+t5 = time.time()
+print "fi evaluacio (100%) va passar",t5-t0
+print
 print "_____________RESULTATS_______________"
-
+print 
 #Some prints
-print "Total positives: ", totalPositives
-print "Total negatives: ", totalNegatives
+print "Total positives words: ", totalPositives
+print "Total negatives words: ", totalNegatives
+print "Total positives examples: ", totalPositiveEntries
+print "Total negatives examples: ", totalNegativeEntries
 print "Total entries", totalEntries
 print "Array resultBayes", resultBayes
-print "Array resultLaplace", resultLaplace
+#print "Array resultLaplace", resultLaplace
 print "efficiencyBayes",efficiencyBayes
-print "efficiencyLaplace", efficiencyLaplace
+#print "efficiencyLaplace", efficiencyLaplace
 #print "Dictionary Positives",sortDictPositives
 print 
 print '----------------------------------------'
 print 
 #print "Dictionary Negatives ",sortDictNegatives
-print nItems['the']
