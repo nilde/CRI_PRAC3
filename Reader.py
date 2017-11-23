@@ -94,8 +94,8 @@ def bayesianPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg,totalP
             else:
                 neg += 0
 
-        pos += totalPosExamples/totalEnt
-        neg += totalNegExamples/totalEnt
+        pos += (totalPosExamples/totalEnt)*(-1)
+        neg += (totalNegExamples/totalEnt)*(-1)
 
         res = 1
         if pos<neg:
@@ -169,7 +169,7 @@ for eachEntry in data_tr:
             else:
                 dictionaryNegatives[eachWord] = 1.0
             totalNegatives+=1
-        totalPositiveEntries+=1
+        totalNegativeEntries+=1
     else:
         for eachWord in eachEntry[1].split(' '):
             if (dictionaryPositives.has_key(eachWord)):
@@ -177,7 +177,7 @@ for eachEntry in data_tr:
             else:
                 dictionaryPositives[eachWord] = 1.0
             totalPositives+=1
-        totalNegativeEntries+=1
+        totalPositiveEntries+=1
     totalEntries+=1
 
 for eachWord in dictionaryPositives.keys():
@@ -200,13 +200,19 @@ print "Ordenacio finalitzada (60%) temps",t2-t1
 
 #take some elements
 numOfElements=100
-nItems = OrderedDict(sortDictPositives.items()[:numOfElements])
+firstPositives = OrderedDict(sortDictPositives.items()[:numOfElements])
+firstNegatives = OrderedDict(sortDictNegatives.items()[:numOfElements])
 t3=time.time()
 print "Comencem a extreure resultats (75%)"
 alpha = 0.5
 
-resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
+#resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
 #resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
+
+#fixedDictionarySize
+totalPositivesFixed = abs(sum(firstPositives.values()))
+totalNegativesFixed = abs(sum(firstNegatives.values()))
+resultBayes = bayesianPredict(data_tst,firstPositives,firstNegatives,numOfElements,totalPositivesFixed,totalNegativesFixed,totalPositiveEntries,totalNegativeEntries)
 
 t4 = time.time()
 print "resultats Finalitzats anem a evaluacio (90%) amb temps",t4-t3
