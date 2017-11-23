@@ -86,11 +86,11 @@ def bayesianPredict(data_tst,dicPos, dicNeg, totalEnt, totalPos, totalNeg,totalP
         pos,neg=0,0
         for word in separatedWords:
             if dicPos.has_key(word):
-                pos += np.log(dicPos[word]/totalPos)
+                pos += dicPos[word]
             else:
                 pos += 0
             if dicNeg.has_key(word):
-                neg += np.log(dicNeg[word]/totalNeg)
+                neg += dicNeg[word]
             else:
                 neg += 0
 
@@ -179,6 +179,13 @@ for eachEntry in data_tr:
             totalPositives+=1
         totalNegativeEntries+=1
     totalEntries+=1
+
+for eachWord in dictionaryPositives.keys():
+    dictionaryPositives[eachWord]=np.log(dictionaryPositives[eachWord]/totalPositives)
+
+for eachWord in dictionaryNegatives.keys():
+    dictionaryNegatives[eachWord]=np.log(dictionaryNegatives[eachWord]/totalNegatives)
+    
 t1 = time.time()
 print "Analisi train en",t1-t0
 print "Contar positius i negatius finalitzat (45%)"
