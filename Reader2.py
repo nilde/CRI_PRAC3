@@ -49,7 +49,7 @@ def printMedidas(tp, tn, fp, fn):
     rec = recall(tp,fn)
     spcy = specifity(tn,fp)
     fS = fScore(prec, rec)
-    print  "tp: "+str(tp)+" tn: "+str(tn)+" fp: "+str(fp)+" fn: "+str(fn)
+    print "tp: "+str(tp)+" tn: "+str(tn)+" fp: "+str(fp)+" fn: "+str(fn)
     print "Precision: "+str(prec)+"\nAccuracy: "+str(acc)+"\nRecall: "+str(rec)+"\nSpecificity: "+str(spcy)+"\nfScore: "+str(fS)
     return prec, acc, rec, spcy, fS
 
