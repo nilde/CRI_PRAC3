@@ -159,7 +159,7 @@ def laplace_Part(data_tst, dictionaryPositivesLS,dictionaryNegativesLS, totalEnt
     firstNegativesLS = OrderedDict(sortDictNegativesLS.items()[:numOfElements])
     totalPositivesFixedLS = abs(sum(firstPositivesLS.values()))
     totalNegativesFixedLS = abs(sum(firstNegativesLS.values()))
-    return laplaceSmoothingPredict(data_tst,firstPositivesLS,firstNegativesLS,numOfElements,totalPositivesFixedLS,totalNegativesFixedLS,totalPositiveEntries,totalNegativeEntries)
+    return laplaceSmoothingPredict(data_tst,sortDictPositivesLS,sortDictNegativesLS,totalEntries,totalPositivesFixedLS,totalNegativesFixedLS)
     
 
 def main():
@@ -231,7 +231,7 @@ def main():
     
     
     #laplace
-    alpha = 0.2
+    alpha = 0.5
     dictionaryPositivesLS = {}
     dictionaryNegativesLS = {}
     for eachWord in dictionaryPositives.keys():
@@ -277,17 +277,18 @@ def main():
     print "Total positives examples: ", totalPositiveEntries
     print "Total negatives examples: ", totalNegativeEntries
     print "Total entries", totalEntries
-    #print "Array resultBayes", resultBayes
-    print "Array resultLaplace", resultLaplace
     print "Resultats Bayes"
     printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
+    print "_________________"
     print "Resultats Laplace"
     printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
+    print "________________"
     print "Resultats Bayes Part"
     printMedidas(efficiencyBayes_Part['TP'],efficiencyBayes_Part['TN'],efficiencyBayes_Part['FP'],efficiencyBayes_Part['FN'])
+    print "________________"
     print "Resultats Laplace Part"
     printMedidas(efficiencyLaplace_Part['TP'],efficiencyLaplace_Part['TN'],efficiencyLaplace_Part['FP'],efficiencyLaplace_Part['FN'])
-    print 
+    print "________________"
     print '----------------------------------------'
     print 
     #print "Dictionary Negatives ",sortDictNegatives
