@@ -125,6 +125,43 @@ def evaluation(predict, validatation):
                 efficiency['FN']+=1
     return dict(efficiency)
 
+def bayes(data_tst, dictionaryPositives,dictionaryNegatives, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries):
+    sortedListPositives =sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
+    sortDictPositives = OrderedDict(sortedListPositives)
+    sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
+    sortDictNegatives = OrderedDict(sortedListNegatives)
+    return bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
+
+def laplace(data_tst, dictionaryPositivesLS,dictionaryNegativesLS, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries):
+    sortedListPositivesLS =sorted(dictionaryPositivesLS.items(), key=lambda x: x[1],reverse=True)
+    sortDictPositivesLS = OrderedDict(sortedListPositivesLS)
+    sortedListNegativesLS = sorted(dictionaryNegativesLS.items(), key=lambda x: x[1],reverse=True)
+    sortDictNegativesLS = OrderedDict(sortedListNegativesLS)
+    return laplaceSmoothingPredict(data_tst,sortDictPositivesLS,sortDictNegativesLS,totalEntries,totalPositives,totalNegatives)
+    
+def bayes_Part(data_tst, dictionaryPositives,dictionaryNegatives, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries, numOfElements=100):
+    sortedListPositives =sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
+    sortDictPositives = OrderedDict(sortedListPositives)
+    sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
+    sortDictNegatives = OrderedDict(sortedListNegatives)
+    firstPositives = OrderedDict(sortDictPositives.items()[:numOfElements])
+    firstNegatives = OrderedDict(sortDictNegatives.items()[:numOfElements])
+    totalPositivesFixed = abs(sum(firstPositives.values()))
+    totalNegativesFixed = abs(sum(firstNegatives.values()))
+    return bayesianPredict(data_tst,firstPositives,firstNegatives,numOfElements,totalPositivesFixed,totalNegativesFixed,totalPositiveEntries,totalNegativeEntries)
+    
+def laplace_Part(data_tst, dictionaryPositivesLS,dictionaryNegativesLS, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries, numOfElements=100):
+    sortedListPositivesLS =sorted(dictionaryPositivesLS.items(), key=lambda x: x[1],reverse=True)
+    sortDictPositivesLS = OrderedDict(sortedListPositivesLS)
+    sortedListNegativesLS = sorted(dictionaryNegativesLS.items(), key=lambda x: x[1],reverse=True)
+    sortDictNegativesLS = OrderedDict(sortedListNegativesLS)
+    firstPositivesLS = OrderedDict(sortDictPositivesLS.items()[:numOfElements])
+    firstNegativesLS = OrderedDict(sortDictNegativesLS.items()[:numOfElements])
+    totalPositivesFixedLS = abs(sum(firstPositivesLS.values()))
+    totalNegativesFixedLS = abs(sum(firstNegativesLS.values()))
+    return laplaceSmoothingPredict(data_tst,firstPositivesLS,firstNegativesLS,numOfElements,totalPositivesFixedLS,totalNegativesFixedLS,totalPositiveEntries,totalNegativeEntries)
+    
+
 def main():
     destFile='FinalStemmedSentimentAnalysisDataset.csv'
     #destFile='shortDatabase.csv'
@@ -187,14 +224,14 @@ def main():
         totalEntries+=1
     
     #Bayes
-    """for eachWord in dictionaryPositives.keys():
+    for eachWord in dictionaryPositives.keys():
         dictionaryPositives[eachWord]=np.log(dictionaryPositives[eachWord]/totalPositives)
     for eachWord in dictionaryNegatives.keys():
         dictionaryNegatives[eachWord]=np.log(dictionaryNegatives[eachWord]/totalNegatives)
-    """ 
+    
     
     #laplace
-    alpha = 0.5
+    alpha = 0.2
     dictionaryPositivesLS = {}
     dictionaryNegativesLS = {}
     for eachWord in dictionaryPositives.keys():
@@ -205,53 +242,32 @@ def main():
     t1 = time.time()
     print "Analisi train en",t1-t0
     print "Contar positius i negatius finalitzat (45%)"
-    #Sorts for the dicts
-    #bayes
-    """sortedListPositives =sorted(dictionaryPositives.items(), key=lambda x: x[1],reverse=True)
-    sortDictPositives = OrderedDict(sortedListPositives)
-    sortedListNegatives = sorted(dictionaryNegatives.items(), key=lambda x: x[1],reverse=True)
-    sortDictNegatives = OrderedDict(sortedListNegatives)
-    """
-    #laplace
-    sortedListPositivesLS =sorted(dictionaryPositivesLS.items(), key=lambda x: x[1],reverse=True)
-    sortDictPositivesLS = OrderedDict(sortedListPositivesLS)
-    sortedListNegativesLS = sorted(dictionaryNegativesLS.items(), key=lambda x: x[1],reverse=True)
-    sortDictNegativesLS = OrderedDict(sortedListNegativesLS)
-    
+    print "Comencem a extreure resultats (55%)"
+    resultBayes = bayes(data_tst, dictionaryPositives,dictionaryNegatives, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries)
     t2 = time.time()
-    print "Ordenacio finalitzada (60%) temps",t2-t1
+    print "Comencem a extreure resultats (65%)",t2-t1
+    resultLaplace = laplace(data_tst, dictionaryPositivesLS,dictionaryNegativesLS, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries)
+    t3 = time.time()
+    print "Comencem a extreure resultats (75%)",t3-t2
     
-    #take some elements
     numOfElements=100
-    #firstPositives = OrderedDict(sortDictPositives.items()[:numOfElements])
-    #firstNegatives = OrderedDict(sortDictNegatives.items()[:numOfElements])
-    firstPositivesLS = OrderedDict(sortDictPositivesLS.items()[:numOfElements])
-    firstNegativesLS = OrderedDict(sortDictNegativesLS.items()[:numOfElements])
-    t3=time.time()
-    print "Comencem a extreure resultats (75%)"
-    
-    #resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
-    resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositivesLS,sortDictNegativesLS,totalEntries,totalPositives,totalNegatives)
-    
-    #fixedDictionarySize
-    """totalPositivesFixed = abs(sum(firstPositives.values()))
-    totalNegativesFixed = abs(sum(firstNegatives.values()))
-    resultBayes = bayesianPredict(data_tst,firstPositives,firstNegatives,numOfElements,totalPositivesFixed,totalNegativesFixed,totalPositiveEntries,totalNegativeEntries)
-    totalPositivesFixedLS = abs(sum(firstPositivesLS.values()))
-    totalNegativesFixedLS = abs(sum(firstNegativesLS.values()))
-    resultBayes = laplaceSmoothingPredict(data_tst,firstPositivesLS,firstNegativesLS,numOfElements,totalPositivesFixedLS,totalNegativesFixedLS,totalPositiveEntries,totalNegativeEntries)
-    
-    """
+    resultsBayesPart = bayes_Part(data_tst, dictionaryPositives,dictionaryNegatives, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries)
     t4 = time.time()
-    print "resultats Finalitzats anem a evaluacio (90%) amb temps",t4-t3
+    print "Comencem a extreure resultats (85%)",t4-t3
+    resultLaplacePart = laplace_Part(data_tst, dictionaryPositivesLS,dictionaryNegativesLS, totalEntries, totalPositives, totalNegatives, totalPositiveEntries, totalNegativeEntries,numOfElements)
+    
+    t5 = time.time()
+    print "resultats Finalitzats anem a evaluacio (90%) amb temps",t5-t4
     
     #get TP,TN,FP,FN
-    #efficiencyBayes = evaluation(resultBayes,data_tst)
+    efficiencyBayes = evaluation(resultBayes,data_tst)
     efficiencyLaplace = evaluation(resultLaplace,data_tst)
-    t5 = time.time()
+    efficiencyBayes_Part = evaluation(resultsBayesPart,data_tst)
+    efficiencyLaplace_Part = evaluation(resultLaplacePart,data_tst)
+    t6 = time.time()
     
     
-    print "fi evaluacio (100%) va passar",t5-t0
+    print "fi evaluacio (100%) va passar",t6-t0
     print
     print "_____________RESULTATS_______________"
     print 
@@ -263,10 +279,14 @@ def main():
     print "Total entries", totalEntries
     #print "Array resultBayes", resultBayes
     print "Array resultLaplace", resultLaplace
-    #print "Resultats Bayes"
-    #printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
+    print "Resultats Bayes"
+    printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
     print "Resultats Laplace"
     printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
+    print "Resultats Bayes Part"
+    printMedidas(efficiencyBayes_Part['TP'],efficiencyBayes_Part['TN'],efficiencyBayes_Part['FP'],efficiencyBayes_Part['FN'])
+    print "Resultats Laplace Part"
+    printMedidas(efficiencyLaplace_Part['TP'],efficiencyLaplace_Part['TN'],efficiencyLaplace_Part['FP'],efficiencyLaplace_Part['FN'])
     print 
     print '----------------------------------------'
     print 
