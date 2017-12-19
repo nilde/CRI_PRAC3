@@ -126,8 +126,8 @@ def evaluation(predict, validatation):
                 efficiency['FN']+=1
     return dict(efficiency)
 
-if __name__ == "__main__":
-    destFile='FinalStemmedSentimentAnalysisDataset.csv'
+def main():
+    destFile='./../FinalStemmedSentimentAnalysisDataset.csv'
     #destFile='shortDatabase.csv'
     dictionaryPositives={}
     dictionaryNegatives={}
@@ -204,22 +204,22 @@ if __name__ == "__main__":
     firstNegatives = OrderedDict(sortDictNegatives.items()[:numOfElements])
     t3=time.time()
     print "Comencem a extreure resultats (75%)"
-    alpha = 0.5
+    alpha = 0.8
     
     #resultBayes = bayesianPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries)
-    #resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
+    resultLaplace = laplaceSmoothingPredict(data_tst,sortDictPositives,sortDictNegatives,totalEntries,totalPositives,totalNegatives,alpha)
     
     #fixedDictionarySize
-    totalPositivesFixed = abs(sum(firstPositives.values()))
+    """totalPositivesFixed = abs(sum(firstPositives.values()))
     totalNegativesFixed = abs(sum(firstNegatives.values()))
     resultBayes = bayesianPredict(data_tst,firstPositives,firstNegatives,numOfElements,totalPositivesFixed,totalNegativesFixed,totalPositiveEntries,totalNegativeEntries)
-    
+    """
     t4 = time.time()
     print "resultats Finalitzats anem a evaluacio (90%) amb temps",t4-t3
     
     #get TP,TN,FP,FN
-    efficiencyBayes = evaluation(resultBayes,data_tst)
-    #efficiencyLaplace = evaluation(resultLaplace,data_tst)
+    #efficiencyBayes = evaluation(resultBayes,data_tst)
+    efficiencyLaplace = evaluation(resultLaplace,data_tst)
     t5 = time.time()
     
     
@@ -233,13 +233,16 @@ if __name__ == "__main__":
     print "Total positives examples: ", totalPositiveEntries
     print "Total negatives examples: ", totalNegativeEntries
     print "Total entries", totalEntries
-    print "Array resultBayes", resultBayes
-    #print "Array resultLaplace", resultLaplace
+    #print "Array resultBayes", resultBayes
+    print "Array resultLaplace", resultLaplace
     print "Resultats Bayes"
-    printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
-    #print "Resultats Laplace"
-    #printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
+    #printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
+    print "Resultats Laplace"
+    printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
     print 
     print '----------------------------------------'
     print 
     #print "Dictionary Negatives ",sortDictNegatives
+
+if __name__ == "__main__":
+    main()
