@@ -211,8 +211,8 @@ def main(data_array, numItems, trainRatio):
     
     #take some elements
     numOfElements=numItems
-    firstPositivesLS = OrderedDict(sortDictPositivesLS.items()[:numOfElements])
-    firstNegativesLS = OrderedDict(sortDictNegativesLS.items()[:numOfElements])
+    #firstPositivesLS = OrderedDict(sortDictPositivesLS.items()[:numOfElements])
+    #firstNegativesLS = OrderedDict(sortDictNegativesLS.items()[:numOfElements])
     t3=time.time()
     print "Comencem a extreure resultats (75%)"
     
@@ -220,16 +220,16 @@ def main(data_array, numItems, trainRatio):
     t4 = time.time()
     print "Comencem a extreure resultats (85%)",t4-t3
     #fixedDictionarySize
-    totalPositivesFixedLS = abs(sum(firstPositivesLS.values()))
-    totalNegativesFixedLS = abs(sum(firstNegativesLS.values()))
-    resultsLaplacePart = laplaceSmoothingPredict(data_tst,firstPositivesLS,firstNegativesLS,totalEntries,totalPositivesFixedLS,totalNegativesFixedLS)
+    #totalPositivesFixedLS = abs(sum(firstPositivesLS.values()))
+    #totalNegativesFixedLS = abs(sum(firstNegativesLS.values()))
+    #resultsLaplacePart = laplaceSmoothingPredict(data_tst,firstPositivesLS,firstNegativesLS,totalEntries,totalPositivesFixedLS,totalNegativesFixedLS)
 
     t5 = time.time()
     print "resultats Finalitzats anem a evaluacio (90%) amb temps",t5-t4
     
     #get TP,TN,FP,FN
     efficiencyLaplace = evaluation(resultLaplace,data_tst)
-    efficiencyLaplacePart = evaluation(resultsLaplacePart,data_tst)
+    #efficiencyLaplacePart = evaluation(resultsLaplacePart,data_tst)
     t6 = time.time()
     
     
@@ -246,10 +246,10 @@ def main(data_array, numItems, trainRatio):
     print "Resultats Laplace"
     LaplaceRes = printMedidas(efficiencyLaplace['TP'],efficiencyLaplace['TN'],efficiencyLaplace['FP'],efficiencyLaplace['FN'])
     print "________________"
-    print "Results Laplace Part amb ",numOfElements," elements al dic"
-    LaplacePartResult = printMedidas(efficiencyLaplacePart['TP'],efficiencyLaplacePart['TN'],efficiencyLaplacePart['FP'],efficiencyLaplacePart['FN'])
+    #print "Results Laplace Part amb ",numOfElements," elements al dic"
+    #LaplacePartResult = printMedidas(efficiencyLaplacePart['TP'],efficiencyLaplacePart['TN'],efficiencyLaplacePart['FP'],efficiencyLaplacePart['FN'])
     print '----------------------------------------'
-    return LaplacePartResult
+    return LaplaceRes
 
 def test():
     destFile='FinalStemmedSentimentAnalysisDataset.csv'
@@ -263,7 +263,7 @@ def test():
     data_array = np.asarray(data)
     
     
-    csvfile='LaplacePartItms2.csv'
+    """ csvfile='LaplacePartItms2.csv'
     intitialValue = 5000
     finalValue = 8000
     with open(csvfile, "w") as output:
@@ -271,7 +271,19 @@ def test():
         writer.writerow(["Precision","Accuracy","Recall","Specificity","fScore"])
         for numItems in range(intitialValue,finalValue,300):
             receivedData=main(data_array,numItems,0.8)
+            writer.writerow(receivedData)""" 
+            
+    csvfile='LaplaceRatio.csv'
+    intitialValue = 0.5
+    finalValue = 9
+    with open(csvfile, "w") as output:
+        writer = csv.writer(output,lineterminator='\n')
+        writer.writerow(["Precision","Accuracy","Recall","Specificity","fScore"])
+        for numItems in [0.005,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
+            receivedData=main(data_array,6000,float(numItems))
             writer.writerow(receivedData)
+    
+    
 
 if __name__ == "__main__":
     test()
