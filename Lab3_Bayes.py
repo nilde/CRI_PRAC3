@@ -129,9 +129,9 @@ def evaluation(predict, validatation):
                 efficiency['FN']+=1
     return dict(efficiency)
 
-def main(numItems):
-    #destFile='bigDatabase.csv'
-    destFile='shortDatabase.csv'
+def main(trainRatio,data):
+   
+    #destFile='shortDatabase.csv'
     dictionaryPositives={}
     dictionaryNegatives={}
     
@@ -147,12 +147,7 @@ def main(numItems):
     
     #Metrics for compute algorithm efficiency
     
-    with open(destFile,'r') as destF:
-        dataForIter = csv.reader(destF, 
-                               delimiter = ';', 
-                               quotechar = '"')
     
-        data = [data for data in dataForIter]
     #print data
     data_array = np.asarray(data)
     total_Pos = 0
@@ -163,7 +158,7 @@ def main(numItems):
         totalData += 1
     print "Lectura Finalitzada (15%)"
     
-    ratio = 0.8
+    ratio = trainRatio
     data_tr,data_tst = split_data(data_array,ratio)
     
     print "Particio finalitzada amb ratio de:",ratio,' (30%)'
@@ -211,7 +206,7 @@ def main(numItems):
     print "Ordenacio finalitzada (60%) temps",t2-t1
     
     #take some elements
-    numOfElements=numItems
+    numOfElements=6000
     firstPositives = OrderedDict(sortDictPositives.items()[:numOfElements])
     firstNegatives = OrderedDict(sortDictNegatives.items()[:numOfElements])
     t3=time.time()
@@ -250,19 +245,31 @@ def main(numItems):
     print 
     #print "Dictionary Negatives ",sortDictNegatives
 
-    return [totalPositives,totalNegatives,totalPositiveEntries,totalNegativeEntries,totalEntries]+printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
+    return printMedidas(efficiencyBayes['TP'],efficiencyBayes['TN'],efficiencyBayes['FP'],efficiencyBayes['FN'])
 
-if __name__ == "__main__":
 
-    initialValue=0
-    finalValue=20
-    numPartitions=2
+def someStuff():
+    initialValue=100
+    finalValue=8000
+    numPartitions=80
     csvfile='fichero.csv'
+    destFile='bigDatabase.csv'
+    with open(destFile,'r') as destF:
+        dataForIter = csv.reader(destF, 
+                               delimiter = ';', 
+                               quotechar = '"')
+    
+        data = [data for data in dataForIter]
 
     with open(csvfile, "w") as output:
-        for numItems in range(initialValue,finalValue,int(finalValue/numPartitions)):
-            receivedData=main(numItems)
-            writer = csv.writer(output, lineterminator='\n')
+        writer = csv.writer(output, lineterminator='\n')
+        writer.writerow(["Precision","Accuracy","Recall","Specificity","fScore"])
+        for trainRatio in [0.005,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]:
+            receivedData=main(trainRatio,data)
             writer.writerow(receivedData) 
+
+if __name__ == "__main__":
+    someStuff()
+   
     
     
